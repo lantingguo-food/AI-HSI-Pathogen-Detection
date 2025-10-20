@@ -1,0 +1,62 @@
+seed: 42
+paths:
+  train_dir: data/train
+  val_dir: data/val
+  test_dir: data/test
+  run_dir: runs/exp1
+  log_dir: runs/exp1/tb
+
+task: classification
+classes: [safe, contaminated]
+
+data:
+  cube_key: cubes
+  labels_file: labels.csv
+  input_format: npy          # npy | envi
+  window: [32, 32]
+  spec_bands: null
+  stride: [16, 16]
+  normalize: snv             # snv | msc | zscore | none
+  cache_in_ram: false
+  num_workers: 4
+
+aug:
+  hflip: 0.5
+  vflip: 0.5
+  rot90: 0.5
+  spectral_jitter_std: 0.01
+  gaussian_noise_std: 0.01
+  mixup_alpha: 0.2
+  cutmix_alpha: 0.2
+
+model:
+  name: resnet3d_18
+  in_channels: auto
+  width: 32
+  pretrained_ckpt: null
+  freeze_layers: []
+  dropout: 0.1
+
+trainer:
+  batch_size: 8
+  max_epochs: 100
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  warmup_epochs: 5
+  optimizer: adamw
+  scheduler: cosine
+  amp: true
+  grad_clip: 1.0
+  patience: 15
+  class_weights: null
+
+eval:
+  tta: false
+  threshold: 0.5
+
+logging:
+  use_tensorboard: true
+  log_every: 50
+  save_top_k: 3
+  monitor: val_f1
+  mode: max
